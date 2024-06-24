@@ -7,7 +7,7 @@ It is a very basic project and primarily used for my practice.
 Run in the terminal: python hello_ping_server.py
 
 Go to your browser and if you use the default port, then:
-+ http://localhost:8000/ will display "Index Page" as a heading (<h1>)
++ http://localhost:8000/ will display "Index Page" as a heading (h1)
 + http://localhost:8000/hello will display "Hello, World!".
 + http://localhost:8000/ping will display the current date and time.
 
