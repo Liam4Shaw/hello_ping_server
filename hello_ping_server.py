@@ -1,5 +1,6 @@
 from http.server import HTTPServer, BaseHTTPRequestHandler
 from typing import Dict, Any
+import time
 
 class CustomHTTPRequestHandler(BaseHTTPRequestHandler):
     '''Custom HTTP request handler, handling GET requests for root (/), /hello and /ping endpoints.'''
@@ -31,7 +32,7 @@ class CustomHTTPRequestHandler(BaseHTTPRequestHandler):
 
 def handle_root(request: Dict[str, Any]) -> Dict[str, Any]:
     '''Handle the root (/) endpoint.'''
-    return {'code': 200, 'body': 'Index Page', 'headers': {'Content-Type': 'text/html'}}
+    return {'code': 200, 'body': '<h1>Index Page</h1>', 'headers': {'Content-Type': 'text/html'}}
 
 def handle_hello(request: Dict[str, Any]) -> Dict[str, Any]:
     '''Handle the /hello endpoint.'''
@@ -39,20 +40,48 @@ def handle_hello(request: Dict[str, Any]) -> Dict[str, Any]:
 
 def handle_ping(request: Dict[str, Any]) -> Dict[str, Any]:
     '''Handle the /ping endpoint.'''
-    return {'code': 200, 'body': 'pong', 'headers': {'Content-Type': 'text/html'}}
+    response_body = '''
+    <!DOCTYPE html>
+    <html>
+    <head>
+        <title>Ping</title>
+        <script>
+            function updateTime() {
+                fetch('/time')    // Make a GET request to the /time endpoint
+                .then(response => response.text())
+                .then(data => {
+                    document.getElementById('time').innerText = data;
+                });
+            }
+            setInterval(updateTime, 1000);    // Call updateTime every 1000 milliseconds
+            window.onload = updateTime;
+        </script>
+    </head>
+    <body>
+        <h1>Current date and time:</h1>
+        <p id="time"></p>
+    </body>
+    </html>
+    '''
+    return {'code': 200, 'body': response_body, 'headers': {'Content-Type': 'text/html'}}
 
-def handle_404() -> Dict[str, Any]:
+def handle_time(request: Dict[str, Any]) -> Dict[str, Any]:
+    '''Handle the /time endpoint to return the current date and time.'''
+    return {'code': 200, 'body': time.ctime(), 'headers': {'Content-Type': 'text/plain'}}
+
+def handle_404(request: Dict[str, Any]) -> Dict[str, Any]:
     '''Handle 404 Not Found errors.'''
-    return {'code': 404, 'body': 'Not Found', 'headers': {'Content-Type': 'text/plain'}}
+    return {'code': 404, 'body': 'Not Found', 'headers': {'Content-Type': 'text/html'}}
 
 def handle_error(error: Exception) -> Dict[str, Any]:
     '''Handle internal server errors.'''
-    return {'code': 500, 'body': 'Internal Server Error', 'headers': {'Content-Type': 'text/plain'}}
+    return {'code': 500, 'body': 'Internal Server Error', 'headers': {'Content-Type': 'text/html'}}
 
 routes = {
     ("GET", "/"): handle_root,
     ("GET", "/hello"): handle_hello,
-    ("GET", "/ping"): handle_ping
+    ("GET", "/ping"): handle_ping,
+    ("GET", "/time"): handle_time
 }
 
 def route_lookup(request: Dict[str, Any]) -> Any:
