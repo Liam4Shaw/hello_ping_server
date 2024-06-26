@@ -1,7 +1,6 @@
 from http.server import HTTPServer, BaseHTTPRequestHandler
 from typing import Dict, Any
 import urllib
-import time
 
 class CustomHTTPRequestHandler(BaseHTTPRequestHandler):
     '''Custom HTTP request handler, handling GET requests for root (/), /hello and /ping endpoints.'''
@@ -51,11 +50,8 @@ def handle_ping(request: Dict[str, Any]) -> Dict[str, Any]:
         <title>Ping</title>
         <script>
             function updateTime() {
-                fetch('/time')    // Make a GET request to the /time endpoint
-                .then(response => response.text())
-                .then(data => {
-                    document.getElementById('time').innerText = data;
-                });
+                const time = new Date().toString();
+                document.getElementById('time').innerText = time;
             }
             setInterval(updateTime, 1000);    // Call updateTime every 1000 milliseconds
             window.onload = updateTime;
@@ -68,10 +64,6 @@ def handle_ping(request: Dict[str, Any]) -> Dict[str, Any]:
     </html>
     '''
     return {'code': 200, 'body': response_body, 'headers': {'Content-Type': 'text/html'}}
-
-def handle_time(request: Dict[str, Any]) -> Dict[str, Any]:
-    '''Handle the /time endpoint to return the current date and time.'''
-    return {'code': 200, 'body': time.ctime(), 'headers': {'Content-Type': 'text/plain'}}
 
 def handle_404(request: Dict[str, Any]) -> Dict[str, Any]:
     '''Handle 404 Not Found errors.'''
@@ -100,7 +92,6 @@ routes = {
     ("GET", "/"): handle_root,
     ("GET", "/hello"): handle_hello,
     ("GET", "/ping"): handle_ping,
-    ("GET", "/time"): handle_time,
     ("GET", "/badrequest"): handle_bad_request,
     ("GET", "/accessdenied"): handle_access_denied
 }
