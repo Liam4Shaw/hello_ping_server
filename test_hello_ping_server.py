@@ -4,9 +4,11 @@ from hello_ping_server import route_lookup, handle_root, handle_hello, handle_pi
 class TestRouteLookup(unittest.TestCase):
     
     def setUp(self):
-        self.request = {'path': '', 'method': 'GET'}
+        self.request = {'method': 'GET'}
 
     def test_route_lookup_root(self):
+        self.request['path'] = ''
+        self.assertEqual(route_lookup(self.request), handle_root)
         self.request['path'] = '/'
         self.assertEqual(route_lookup(self.request), handle_root)
         # For POST instead of expected GET request, 404 error is raised
@@ -42,35 +44,35 @@ class TestHelloPingServer(unittest.TestCase):
         pass
         
     def test_handle_root(self):
-        self.request['url'] = '/'
+        self.request['path'] = '/'
         response = handle_root(self.request)
         self.assertEqual(response['code'], 200)
         self.assertIn('<h1>Index Page</h1>', response['body'])
-        self.request['url'] = ''
+        self.request['path'] = ''
         response = handle_root(self.request)
         self.assertEqual(response['code'], 200)
         self.assertIn('<h1>Index Page</h1>', response['body'])
     
     def test_handle_hello(self):
-        self.request['url'] = '/hello'
+        self.request['path'] = '/hello'
         response = handle_hello(self.request)
         self.assertEqual(response['code'], 200)
         self.assertIn(response['body'], 'Hello World!')
 
     def test_handle_ping(self):
-        self.request['url'] = '/ping'
+        self.request['path'] = '/ping'
         response = handle_ping(self.request)
         self.assertEqual(response['code'], 200)
         self.assertIn('<h1>Current date and time:</h1>', response['body'])
     
     def test_handle_404(self):
-        self.request['url'] = '/notfound'
+        self.request['path'] = '/notfound'
         response = handle_404(self.request)
         self.assertEqual(response['code'], 404)
         self.assertIn('Page Not Found', response['body'])
 
     def test_handle_bad_request(self):
-        self.request['url'] = '/badrequest'
+        self.request['path'] = '/badrequest'
         self.request['query_params'] = {}
         response = handle_bad_request(self.request)
         self.assertEqual(response['code'], 400)
@@ -82,7 +84,7 @@ class TestHelloPingServer(unittest.TestCase):
         self.assertIn('Valid Request', response['body'])
         
     def test_handle_access_denied(self):
-        self.request['url'] = '/accessdenied'
+        self.request['path'] = '/accessdenied'
         response = handle_access_denied(self.request)
         self.assertEqual(response['code'], 403)
         self.assertIn('Forbidden: Missing Authorization header', response['body'])
