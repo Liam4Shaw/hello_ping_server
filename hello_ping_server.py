@@ -96,6 +96,7 @@ def handle_error(error: Exception) -> Dict[str, Any]:
     return {'code': 500, 'body': 'Internal Server Error', 'headers': {'Content-Type': 'text/html'}}
 
 routes = {
+    ("GET", ""): handle_root,
     ("GET", "/"): handle_root,
     ("GET", "/hello"): handle_hello,
     ("GET", "/ping"): handle_ping,
