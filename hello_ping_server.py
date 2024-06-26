@@ -1,5 +1,6 @@
 from http.server import HTTPServer, BaseHTTPRequestHandler
 from typing import Dict, Any
+import urllib
 import time
 
 class CustomHTTPRequestHandler(BaseHTTPRequestHandler):
@@ -10,7 +11,10 @@ class CustomHTTPRequestHandler(BaseHTTPRequestHandler):
         url = self.path
         headers = self.headers
         method = self.command
-        return {'url': url, 'headers': headers, 'method': method}
+        query_params = urllib.parse.parse_qs(urllib.parse.urlparse(url).query)
+        path = urllib.parse.urlparse(url).path
+        return {'url': url, 'headers': headers, 'method': method, 'query_params': query_params, 'path': path}
+    
     
     def do_GET(self) -> None:
         '''Handle GET requests.'''
@@ -28,7 +32,7 @@ class CustomHTTPRequestHandler(BaseHTTPRequestHandler):
         self.wfile.write(response['body'].encode('utf-8'))
 
 
-# handle_root(), handle_hello(), and handle_ping() accept the request data as parameters and return the reponse data
+# handle_root(), handle_hello(), and handle_ping() accept the request data as parameters and return the response data
 
 def handle_root(request: Dict[str, Any]) -> Dict[str, Any]:
     '''Handle the root (/) endpoint.'''
@@ -73,6 +77,20 @@ def handle_404(request: Dict[str, Any]) -> Dict[str, Any]:
     '''Handle 404 Not Found errors.'''
     return {'code': 404, 'body': 'Not Found', 'headers': {'Content-Type': 'text/html'}}
 
+def handle_bad_request(request: Dict[str, Any]) -> Dict[str, Any]:
+    '''Handle requests that result in a Bad Request (400) error.'''
+    query_params = request['query_params']
+    if 'param' not in query_params:
+        return {'code': 400, 'body': 'Bad Request: Missing required query parameter "param".', 'headers': {'Content-Type': 'text/html'}}
+    return {'code': 200, 'body': 'Valid Request', 'headers': {'Content-Type': 'text/html'}}
+
+def handle_access_denied(request: Dict[str, Any]) -> Dict[str, Any]:
+    '''Handle requests that result in an Access Denied (403) error.'''
+    headers = request['headers']
+    if 'Authorization' not in headers:
+        return {'code': 403, 'body': 'Forbidden: Missing Authorization header.', 'headers': {'Content-Type': 'text/html'}}
+    return {'code': 200, 'body': 'Access Granted', 'headers': {'Content-Type': 'text/html'}}
+
 def handle_error(error: Exception) -> Dict[str, Any]:
     '''Handle internal server errors.'''
     return {'code': 500, 'body': 'Internal Server Error', 'headers': {'Content-Type': 'text/html'}}
@@ -81,12 +99,14 @@ routes = {
     ("GET", "/"): handle_root,
     ("GET", "/hello"): handle_hello,
     ("GET", "/ping"): handle_ping,
-    ("GET", "/time"): handle_time
+    ("GET", "/time"): handle_time,
+    ("GET", "/badrequest"): handle_bad_request,
+    ("GET", "/accessdenied"): handle_access_denied
 }
 
 def route_lookup(request: Dict[str, Any]) -> Any:
     '''Lookup the route handler based on the request method and path.'''
-    path = request['url']
+    path = request['path']
     method = request['method']
     route_key = (method, path)
     # If the route_key is found in the routes dictionary, return corresponding handler function, else return the handle_404 function
