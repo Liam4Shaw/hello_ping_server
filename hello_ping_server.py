@@ -75,20 +75,20 @@ def handle_time(request: Dict[str, Any]) -> Dict[str, Any]:
 
 def handle_404(request: Dict[str, Any]) -> Dict[str, Any]:
     '''Handle 404 Not Found errors.'''
-    return {'code': 404, 'body': 'Not Found', 'headers': {'Content-Type': 'text/html'}}
+    return {'code': 404, 'body': 'Page Not Found', 'headers': {'Content-Type': 'text/html'}}
 
 def handle_bad_request(request: Dict[str, Any]) -> Dict[str, Any]:
     '''Handle requests that result in a Bad Request (400) error.'''
     query_params = request['query_params']
     if 'param' not in query_params:
-        return {'code': 400, 'body': 'Bad Request: Missing required query parameter "param".', 'headers': {'Content-Type': 'text/html'}}
+        return {'code': 400, 'body': 'Bad Request: Missing required query parameter "param"', 'headers': {'Content-Type': 'text/html'}}
     return {'code': 200, 'body': 'Valid Request', 'headers': {'Content-Type': 'text/html'}}
 
 def handle_access_denied(request: Dict[str, Any]) -> Dict[str, Any]:
     '''Handle requests that result in an Access Denied (403) error.'''
     headers = request['headers']
     if 'Authorization' not in headers:
-        return {'code': 403, 'body': 'Forbidden: Missing Authorization header.', 'headers': {'Content-Type': 'text/html'}}
+        return {'code': 403, 'body': 'Forbidden: Missing Authorization header', 'headers': {'Content-Type': 'text/html'}}
     return {'code': 200, 'body': 'Access Granted', 'headers': {'Content-Type': 'text/html'}}
 
 def handle_error(error: Exception) -> Dict[str, Any]:
